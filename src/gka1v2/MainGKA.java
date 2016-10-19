@@ -34,7 +34,7 @@ public class MainGKA extends JApplet {
 
 	public static void main(String[] args) {
 		
-		
+		//blah
 		JFrame frame = new JFrame("GKAv2");
 		frame.setSize(600, 600);
 		
