@@ -1,4 +1,3 @@
-package gka1v2;
 
 import java.awt.Color;
 import java.awt.Dimension;
