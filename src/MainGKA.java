@@ -1,6 +1,8 @@
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
@@ -8,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JApplet;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -31,6 +34,8 @@ public class MainGKA extends JFrame{
 	private static JGraphModelAdapter m_adapter;
 	*/
 
+	private static JTextArea logWindow;
+	
 	public static void main(String[] args) {
 		
 		//blah
@@ -43,27 +48,47 @@ public class MainGKA extends JFrame{
 		applet.start();
 		applet.init();
 		
-		JScrollPane scrollApplet = new JScrollPane(applet.getContentPane());
-		splitPaneMain.setLeftComponent(scrollApplet);
+		
+		splitPaneMain.setLeftComponent(applet.getContentPane());
 		//splitPaneMain.setLeftComponent(applet.getContentPane());
 		
-		JTextArea logWindow = new JTextArea("blah");
+		logWindow = new JTextArea("blah");
 		logWindow.setEditable(false);
 		JScrollPane logScollPane = new JScrollPane(logWindow);
 		
 		JSplitPane jSplitDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		JTextField eingabeZeile = new JTextField(1);
 		jSplitDown.setLeftComponent(logScollPane);
-		jSplitDown.setRightComponent(eingabeZeile);
+		
+		JButton sendTextField = new JButton("send");
+		
+		JSplitPane textAndButton = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,eingabeZeile,sendTextField);
+		
+		jSplitDown.setRightComponent(textAndButton);
+		
 		jSplitDown.setDividerSize(1);
+		
 		
 		
 		splitPaneMain.setRightComponent(jSplitDown);
 		
 		
+		sendTextField.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				logWindow.append("\n"+eingabeZeile.getText());
+				eingabeZeile.setText("");
+				
+			}
+		});
+		
+		
 		frame.add(splitPaneMain);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
 		
 		//jSplitDown.setMinimumSize(new Dimension(50,50));
 		jSplitDown.getRightComponent().setMinimumSize(new Dimension(30,30));
@@ -75,7 +100,13 @@ public class MainGKA extends JFrame{
 		splitPaneMain.setDividerSize(1);
 		splitPaneMain.setEnabled(false);
 		jSplitDown.setEnabled(false);
+		textAndButton.setDividerLocation(0.8);
+		textAndButton.setResizeWeight(1.0);
+		textAndButton.setEnabled(false);
+		textAndButton.setDividerSize(0);
 		
+		
+		applet.addVertex("V8", 10, 10);
 		
 		/*
 		ListenableGraph g = new ListenableDirectedGraph<>(DefaultEdge.class);
@@ -126,4 +157,8 @@ public class MainGKA extends JFrame{
     }
     */
 
+	public void log(String zeile){
+		logWindow.append(zeile);
+	}
+	
 }
