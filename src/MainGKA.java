@@ -3,11 +3,14 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.swing.JApplet;
 import javax.swing.JButton;
@@ -35,6 +38,7 @@ public class MainGKA extends JFrame{
 	*/
 
 	private static JTextArea logWindow;
+	private static MainAppletGKA applet;
 	
 	public static void main(String[] args) {
 		
@@ -44,7 +48,7 @@ public class MainGKA extends JFrame{
 		
 		//JScrollPane scroller = new JScrollPane(jgraph);
 		JSplitPane splitPaneMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		MainAppletGKA applet = new MainAppletGKA();
+		applet = new MainAppletGKA();
 		applet.start();
 		applet.init();
 		
@@ -52,7 +56,7 @@ public class MainGKA extends JFrame{
 		splitPaneMain.setLeftComponent(applet.getContentPane());
 		//splitPaneMain.setLeftComponent(applet.getContentPane());
 		
-		logWindow = new JTextArea("blah");
+		logWindow = new JTextArea();
 		logWindow.setEditable(false);
 		JScrollPane logScollPane = new JScrollPane(logWindow);
 		
@@ -78,8 +82,35 @@ public class MainGKA extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				logWindow.append("\n"+eingabeZeile.getText());
+				//logWindow.append("\n"+eingabeZeile.getText());
+				scanInput(eingabeZeile.getText());
 				eingabeZeile.setText("");
+				
+			}
+		});
+		
+		
+		eingabeZeile.addKeyListener(new KeyListener() {
+			
+			@Override
+			public void keyTyped(KeyEvent e) {
+				if(e.getKeyChar()==KeyEvent.VK_ENTER){
+					scanInput(eingabeZeile.getText());
+					eingabeZeile.setText("");
+					
+				}
+				
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -106,7 +137,7 @@ public class MainGKA extends JFrame{
 		textAndButton.setDividerSize(0);
 		
 		
-		applet.addVertex("V8", 10, 10);
+		
 		
 		/*
 		ListenableGraph g = new ListenableDirectedGraph<>(DefaultEdge.class);
@@ -157,8 +188,35 @@ public class MainGKA extends JFrame{
     }
     */
 
-	public void log(String zeile){
-		logWindow.append(zeile);
+	public static void log(String zeile){
+		logWindow.append(zeile+"\n");
+	}
+	public static void scanInput(String order){
+		
+		
+		String temp[] = order.split(" ");
+		if(Pattern.matches("addVertex.*", order)){
+			
+			
+			if(temp.length>=4){
+				log("addVertex-->Name: \""+temp[1]+"\" at x="+temp[2]+" y="+temp[3]);
+				applet.addVertex(temp[1], Integer.parseInt(temp[2]), Integer.parseInt(temp[3]));
+			}else{
+				log("---ERROR--->addVertex benötigt mindestens 3 Parameter!");
+			}
+			//log(temp[0]+"<- 1 "+temp[1]+"<-2 "+temp[2]+"<-3 "+temp[3]+"<-4 ");
+			
+		}else if(Pattern.matches("addEdge.*", order)){
+			if(temp.length>=3){
+				log("addEdge--->Edge zwischen: \""+temp[1]+"\" und "+temp[2]);
+				applet.addEdge(temp[1], temp[2]);
+				
+			}else{
+				log("---ERROR--->addEdge benoetigt mindestens 2 Parameter!");
+			}
+			
+		}
+		
 	}
 	
 }

@@ -43,6 +43,8 @@ public class MainAppletGKA extends JApplet {
         getContentPane(  ).add( jgraph );
         resize( DEFAULT_SIZE );
 
+        
+        /*
         // add some sample data (graph manipulated via JGraphT)
         g.addVertex( "v1" );
         g.addVertex( "v2" );
@@ -58,7 +60,7 @@ public class MainAppletGKA extends JApplet {
         positionVertexAt( "v1", 130, 40 );
         positionVertexAt( "v2", 60, 200 );
         positionVertexAt( "v3", 310, 230 );
-        positionVertexAt( "v4", 380, 70 );
+        positionVertexAt( "v4", 380, 70 );*/
 		
 	}
 	
@@ -96,7 +98,10 @@ public class MainAppletGKA extends JApplet {
     	g.addVertex(name);
     	positionVertexAt(name, x, y);
     }
-    
+    public void addEdge(String e1, String e2){
+    	g.addEdge(e1, e2);
+    	
+    }
 	
 	
 }
