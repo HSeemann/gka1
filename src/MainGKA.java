@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 import org.jgraph.JGraph;
 import org.jgraph.graph.DefaultEdge;
@@ -42,14 +43,39 @@ public class MainGKA extends JFrame{
 		applet.start();
 		applet.init();
 		
-		splitPaneMain.setLeftComponent(applet.getContentPane());
-		//JSplitPane splitPaneZwei
+		JScrollPane scrollApplet = new JScrollPane(applet.getContentPane());
+		splitPaneMain.setLeftComponent(scrollApplet);
+		//splitPaneMain.setLeftComponent(applet.getContentPane());
+		
 		JTextArea logWindow = new JTextArea("blah");
-		splitPaneMain.setRightComponent(logWindow);
+		logWindow.setEditable(false);
+		JScrollPane logScollPane = new JScrollPane(logWindow);
+		
+		JSplitPane jSplitDown = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		JTextField eingabeZeile = new JTextField(1);
+		jSplitDown.setLeftComponent(logScollPane);
+		jSplitDown.setRightComponent(eingabeZeile);
+		jSplitDown.setDividerSize(1);
+		
+		
+		splitPaneMain.setRightComponent(jSplitDown);
+		
 		
 		frame.add(splitPaneMain);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		//jSplitDown.setMinimumSize(new Dimension(50,50));
+		jSplitDown.getRightComponent().setMinimumSize(new Dimension(30,30));
+		//jSplitDown.getRightComponent().setMaximumSize(new Dimension(1024,40));
+		jSplitDown.setResizeWeight(1.0);
+		jSplitDown.setDividerLocation(0.9);
+		splitPaneMain.setResizeWeight(1.0);
+		splitPaneMain.setDividerLocation(0.7);
+		splitPaneMain.setDividerSize(1);
+		splitPaneMain.setEnabled(false);
+		jSplitDown.setEnabled(false);
+		
 		
 		/*
 		ListenableGraph g = new ListenableDirectedGraph<>(DefaultEdge.class);
