@@ -61,6 +61,7 @@ public class MainAppletGKA extends JApplet {
         positionVertexAt( "v2", 60, 200 );
         positionVertexAt( "v3", 310, 230 );
         positionVertexAt( "v4", 380, 70 );*/
+        
 		
 	}
 	

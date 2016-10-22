@@ -195,7 +195,7 @@ public class MainGKA extends JFrame{
 		
 		
 		String temp[] = order.split(" ");
-		if(Pattern.matches("addVertex.*", order)){
+		if(Pattern.matches("addVertex.*", order)||Pattern.matches("addKante.*", order)){
 			
 			
 			if(temp.length>=4){
@@ -206,7 +206,7 @@ public class MainGKA extends JFrame{
 			}
 			//log(temp[0]+"<- 1 "+temp[1]+"<-2 "+temp[2]+"<-3 "+temp[3]+"<-4 ");
 			
-		}else if(Pattern.matches("addEdge.*", order)){
+		}else if(Pattern.matches("addEdge.*", order)||Pattern.matches("addKnoten", order)){
 			if(temp.length>=3){
 				log("addEdge--->Edge zwischen: \""+temp[1]+"\" und "+temp[2]);
 				applet.addEdge(temp[1], temp[2]);
