@@ -22,6 +22,8 @@ public class MainAppletGKA extends JApplet {
     private static final Dimension DEFAULT_SIZE = new Dimension( 530, 320 );
 
 	private JGraphModelAdapter m_jgAdapter;
+	private JGraph jgraph;
+	private ListenableGraph g;
 	
 	public void init(){
 		
@@ -31,16 +33,18 @@ public class MainAppletGKA extends JApplet {
 		logWindow.setLocation(getWidth()+50, getHeight()+50);
 		logWindow.setText("blahhh");
 		
-		ListenableGraph g = new ListenableDirectedGraph(DefaultEdge.class);
+		g = new ListenableDirectedGraph(DefaultEdge.class);
 		
 		m_jgAdapter=new JGraphModelAdapter(g);
 		
-		JGraph jgraph = new JGraph(m_jgAdapter);
+		jgraph = new JGraph(m_jgAdapter);
 		
 		adjustDisplaySettings( jgraph );
         getContentPane(  ).add( jgraph );
         resize( DEFAULT_SIZE );
 
+        
+        /*
         // add some sample data (graph manipulated via JGraphT)
         g.addVertex( "v1" );
         g.addVertex( "v2" );
@@ -56,7 +60,8 @@ public class MainAppletGKA extends JApplet {
         positionVertexAt( "v1", 130, 40 );
         positionVertexAt( "v2", 60, 200 );
         positionVertexAt( "v3", 310, 230 );
-        positionVertexAt( "v4", 380, 70 );
+        positionVertexAt( "v4", 380, 70 );*/
+        
 		
 	}
 	
@@ -89,6 +94,14 @@ public class MainAppletGKA extends JApplet {
         Map cellAttr = new HashMap(  );
         cellAttr.put( cell, attr );
         m_jgAdapter.edit( cellAttr, null, null, null );
+    }
+    public void addVertex(String name, int x, int y){
+    	g.addVertex(name);
+    	positionVertexAt(name, x, y);
+    }
+    public void addEdge(String e1, String e2){
+    	g.addEdge(e1, e2);
+    	
     }
 	
 	
