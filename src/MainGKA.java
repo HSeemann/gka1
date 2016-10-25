@@ -1,3 +1,4 @@
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -29,6 +30,9 @@ import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
 
+
+
+
 public class MainGKA extends JFrame{
 	/*private static final Color     DEFAULT_BG_COLOR = Color.decode( "#FAFBFF" );
     private static final Dimension DEFAULT_SIZE = new Dimension( 530, 320 );
@@ -46,15 +50,16 @@ public class MainGKA extends JFrame{
 		JFrame frame = new JFrame("GKAv2");
 		frame.setSize(600, 600);
 		
-		//JScrollPane scroller = new JScrollPane(jgraph);
+		
 		JSplitPane splitPaneMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		applet = new MainAppletGKA();
 		applet.start();
 		applet.init();
 		
+		JScrollPane scroller = new JScrollPane(applet.getContentPane());
 		
-		splitPaneMain.setLeftComponent(applet.getContentPane());
 		//splitPaneMain.setLeftComponent(applet.getContentPane());
+		splitPaneMain.setLeftComponent(scroller);
 		
 		logWindow = new JTextArea();
 		logWindow.setEditable(false);
@@ -170,6 +175,9 @@ public class MainGKA extends JFrame{
 			}
 		});
 		*/
+		
+		GraphReader gr = new GraphReader("Z:\\GKA\\Demographen von Padberg\\alle.gka");
+		gr.parsefile();
 
 	}
 	

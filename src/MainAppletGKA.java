@@ -44,7 +44,7 @@ public class MainAppletGKA extends JApplet {
         resize( DEFAULT_SIZE );
 
         
-        /*
+/*        
         // add some sample data (graph manipulated via JGraphT)
         g.addVertex( "v1" );
         g.addVertex( "v2" );
@@ -55,12 +55,15 @@ public class MainAppletGKA extends JApplet {
         g.addEdge( "v2", "v3" );
         g.addEdge( "v3", "v1" );
         g.addEdge( "v4", "v3" );
+        
+        
 
         // position vertices nicely within JGraph component
         positionVertexAt( "v1", 130, 40 );
         positionVertexAt( "v2", 60, 200 );
         positionVertexAt( "v3", 310, 230 );
         positionVertexAt( "v4", 380, 70 );*/
+        
         
 		
 	}
@@ -87,6 +90,7 @@ public class MainAppletGKA extends JApplet {
     private void positionVertexAt( Object vertex, int x, int y ) {
         DefaultGraphCell cell = m_jgAdapter.getVertexCell( vertex );
         Map              attr = cell.getAttributes(  );
+        System.out.println(attr);
         Rectangle2D        b    = GraphConstants.getBounds( attr );
 
         GraphConstants.setBounds( attr, new Rectangle( x, y, (int)b.getWidth(),(int) b.getHeight() ) );
@@ -95,12 +99,37 @@ public class MainAppletGKA extends JApplet {
         cellAttr.put( cell, attr );
         m_jgAdapter.edit( cellAttr, null, null, null );
     }
+    
+    
+    /**
+     * 
+     * @param name
+     * @param x
+     * @param y
+     */
     public void addVertex(String name, int x, int y){
     	g.addVertex(name);
     	positionVertexAt(name, x, y);
     }
+    
+    /**
+     * 
+     * @param name
+     */
+    public void addVertex(String name){
+    	//hier die positionierungslogik
+    }
+    
+    /**
+     * 
+     * @param e1
+     * @param e2
+     */
     public void addEdge(String e1, String e2){
     	g.addEdge(e1, e2);
+    	//System.out.println(m_jgAdapter.getEdgeCell(g.getEdge(e1, e2)).getAttributes());
+    	//System.out.println(GraphConstants.getBounds(m_jgAdapter.getEdgeCell(g.getEdge(e1, e2)).getAttributes()));
+    	//m_jgAdapter.getEdgeCell(g.getEdge(e1, e2)).getAttributes().
     	
     }
 	
