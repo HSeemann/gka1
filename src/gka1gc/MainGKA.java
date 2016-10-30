@@ -39,8 +39,8 @@ public class MainGKA {
 	
 	//Einstellungsvariablen
 	protected static String stylesheet="node {fill-color: black; size: 15px, 15px; stroke-mode: plain; stroke-color: blue;} node.marked{ fill-color: red;}node.start{fill-color: green;} node.shortest{ fill-color:green; }edge { fill-color: grey;} edge.shortest{fill-color: green; stroke-width:2px;}";
-	static boolean animated=false;
-	private boolean log=false;
+	static boolean animated=true;
+	private boolean log=true;
 	private boolean dijkstraShort = true;
 	private boolean btsSuche = false;
 	private final double version = 1.0;
@@ -140,7 +140,7 @@ public class MainGKA {
 	
 	public static void main(String[] args) {
 		
-		String pfad = "H:\\Files\\Dropbox\\Dropbox\\Uni\\Semester 3\\GKA\\Hölings\\bspGraphen\\graph03.gka";
+		String pfad = "H:\\Files\\Dropbox\\Dropbox\\Uni\\Semester 3\\GKA\\Hölings\\bspGraphen\\graph01.gka";
 
 		MainGKA main = new MainGKA(pfad);
 		
@@ -153,7 +153,10 @@ public class MainGKA {
 //		boolean erreichbar=main.btsSuche(start, ziel);
 //		System.out.println("der Knoten "+ziel+" ist von "+start+" aus zu erreichen: "+erreichbar);
 		
-		main.dijkstra("Husum", "Hannover");
+		main.btsSuche("j","b");
+		sleep(5000);
+		
+		main.dijkstra("j", "b");
 //		main.btsSuche("Husum", "Hannover");
 		
 //		main.saveGraph();
@@ -451,8 +454,21 @@ public class MainGKA {
 	}
 	public boolean dijkstra(String startKnoten, String endKnoten){
 		if(!btsSuche){
+			
+			if(!weightedGraph){
+				return btsSuche(startKnoten, endKnoten);
+			}
+			
 			zugriffsZaehler.startMeasure("Dijkstra von "+startKnoten+" nach "+endKnoten);
+			zugriffsZaehler.log("Knotenanzahl: "+graph.getNodeCount());
+			zugriffsZaehler.log("Kantenanzahl: "+graph.getEdgeCount());
+			
+			
+			
 		} 
+		
+		
+		
 		
 		boolean erfolgreich=false;
 		
@@ -626,7 +642,7 @@ public class MainGKA {
 		//initialisiert werden
 		
 		
-		zugriffsZaehler.read("initialisierung", 1);
+		zugriffsZaehler.read("initialisierung", 2);
 		
 		
 		
@@ -645,19 +661,22 @@ public class MainGKA {
 		}
 		
 		
-		if(!weightedGraph){
+		
+		
+		
+		
 			Edge tempEdge;
 			
-			zugriffsZaehler.read("initialisierung", 1);
+			
 			
 			Iterator edgeIterator = graph.getEdgeIterator();
 			while(edgeIterator.hasNext()){
 				tempEdge = (Edge)edgeIterator.next();
 				
-				tempEdge.setAttribute(EdgeAttributeWeight, 1.0);
+				tempEdge.setAttribute("ui.class", "unmarked");
 				
 				
-				String edgeName = (String) tempEdge.getAttribute(EdgeAttributeName);
+//				String edgeName = (String) tempEdge.getAttribute(EdgeAttributeName);
 				
 				
 				//das label ggf wieder entfernen
@@ -672,7 +691,7 @@ public class MainGKA {
 				zugriffsZaehler.read("initialisierung", 1);
 				
 				
-			}
+			
 		}
 		
 	}

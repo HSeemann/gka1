@@ -18,6 +18,7 @@ public class MeasureObject {
 	String dateiNameZusatz;
 	ArrayList<String> typ;
 	ArrayList<Integer[]> typWerte;
+	ArrayList<String> sonstiges;
 
 	public MeasureObject() {
 		// TODO Auto-generated constructor stub
@@ -32,6 +33,7 @@ public class MeasureObject {
 
 		this.typ = new ArrayList<String>();
 		this.typWerte = new ArrayList<Integer[]>();
+		this.sonstiges=new ArrayList<String>();
 
 	}
 
@@ -69,6 +71,13 @@ public class MeasureObject {
 		
 		stringB.add(vorgang);
 		stringB.add(System.lineSeparator());
+		
+		stringB.addAll(sonstiges);
+		
+		stringB.add(System.lineSeparator());
+		
+		
+		
 
 		int gesamtLesen = 0;
 
@@ -92,7 +101,7 @@ public class MeasureObject {
 
 		int gesamtSchreiben = 0;
 		stringB.add("Schreibende Zugriffe:");
-		;
+		
 		for (int i = 0; i <= typWerte.size() - 1; i++) {
 
 			stringB.add(typ.get(i) + ":	" + typWerte.get(i)[1]);
@@ -106,9 +115,12 @@ public class MeasureObject {
 		
 		stringB.add("Ende des Vorgangs");
 
-		System.out.println(stringB.toString());
+//		System.out.println(stringB.toString());
 		saveToDisk(stringB);
 
+	}
+	public void log(String message){
+		sonstiges.add(message);
 	}
 
 	private void saveToDisk(ArrayList<String> outputString) {
@@ -116,7 +128,7 @@ public class MeasureObject {
 		String line = "";
 
 		try {
-			fw = new FileWriter(vorgang + dateiNameZusatz + ".gka");
+			fw = new FileWriter(vorgang+ " " + dateiNameZusatz + ".gka");
 			Iterator outputStringIterator = outputString.iterator();
 			while (outputStringIterator.hasNext()) {
 				line = (String) outputStringIterator.next();
