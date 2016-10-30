@@ -2,6 +2,7 @@ package gka1gc;
 
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,6 +20,7 @@ import org.graphstream.graph.implementations.SingleGraph;
 public class MainGKA {
 	
 	ArrayList<Edge>shortestWayDijkstra = new ArrayList<>();
+	FileHandler fileHandler;
 	
 	
 	//der (vorerst) leere Graph
@@ -34,7 +36,7 @@ public class MainGKA {
 	
 	//Einstellungsvariablen
 	protected static String stylesheet="node {fill-color: black; size: 15px, 15px; stroke-mode: plain; stroke-color: blue;} node.marked{ fill-color: red;}node.start{fill-color: green;} node.shortest{ fill-color:green; }edge { fill-color: grey;} edge.shortest{fill-color: green; stroke-width:2px;}";
-	static boolean animated=true;
+	static boolean animated=false;
 	private boolean log=false;
 	private boolean dijkstraShort = true;
 	private boolean btsSuche = false;
@@ -44,8 +46,14 @@ public class MainGKA {
 	private boolean weightedGraph=false;
 	
 
-	public MainGKA(FileParser fp) {
+	public MainGKA(String quellPfad) {
 
+		graph.addAttribute("ui.stylesheet", stylesheet);
+		
+		fileHandler = new FileHandler(quellPfad);
+		
+		FileParser fp = fileHandler.getFileParser();
+		fp.parsefile();
 		
 		
 		HashSet<String> nodeSet = fp.getNodes();
@@ -119,6 +127,7 @@ public class MainGKA {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
+		graph.display();
 		
 	}
 	
@@ -126,27 +135,23 @@ public class MainGKA {
 	
 	public static void main(String[] args) {
 		
+		String pfad = "H:\\Files\\Dropbox\\Dropbox\\Uni\\Semester 3\\GKA\\Hölings\\bspGraphen\\graph06.gka";
+
+		MainGKA main = new MainGKA(pfad);
 		
 		
-//		FileParser fp = new FileParser("H:\\Files\\Dropbox\\Dropbox\\Uni\\Semester 3\\GKA\\Hölings\\bspGraphen\\bsp.gka");
-		FileParser fp = new FileParser("H:\\Files\\Dropbox\\Dropbox\\Uni\\Semester 3\\GKA\\Hölings\\bspGraphen\\graph03.gka");
-//		FileParser fp = new FileParser("C:\\Users\\Patrick\\Dropbox\\Uni\\Semester 3\\GKA\\Hölings\\bspGraphen\\graph03.gka");
-		fp.parsefile();
-		MainGKA main = new MainGKA(fp);
 		
-		graph.addAttribute("ui.stylesheet", stylesheet);
-		graph.display();
 		
-//		sleep();
+
 //		String start="Detmold";
 //		String ziel="Husum";
 //		boolean erreichbar=main.btsSuche(start, ziel);
 //		System.out.println("der Knoten "+ziel+" ist von "+start+" aus zu erreichen: "+erreichbar);
 		
 //		main.dijkstra("Husum", "Hannover");
+//		main.btsSuche("Husum", "Hannover");
 		
-		FileSaver fs = new FileSaver();
-		fs.saveToFile(graph.getEdgeSet());
+//		main.saveGraph();
 		
 	}
 	
@@ -722,6 +727,29 @@ public class MainGKA {
 	}
 	public ArrayList<Edge> getSortestWay(){
 		return shortestWayDijkstra;
+		
+	}
+	
+	/**
+	 * Liefert ALLE im Graph enthaltenen Kanten
+	 * @return eine Collection von Kanten (org.graphstream.graph.Edge)
+	 */
+	public Collection<Edge> getAllEdges(){
+		return graph.getEdgeSet();
+	}
+	/**
+	 * Liefert ALLE im Graphen enthaltenen Knoten 
+	 * @return eine Collection von Knoden (org.graphstream.graph.Node)
+	 */
+	public  Collection<Node> getAllNodes(){
+		return graph.getNodeSet();
+	}
+	
+	/**
+	 * Speichert den Graphen in einer Datei im .gka Format
+	 */
+	public void saveGraph(){
+		fileHandler.saveGraph(getAllEdges());
 		
 	}
 }

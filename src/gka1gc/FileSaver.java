@@ -25,13 +25,14 @@ public class FileSaver {
 	 * Dateien erstellt
 	 */
 	public FileSaver() {
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	public void saveToFile(Collection edgeListe) {
 
 		
 		StringBuilder output = new StringBuilder();
+		ArrayList<String> outputString = new ArrayList<String>();
 		
 		Edge edgeElem;
 		Iterator edgeIterator = edgeListe.iterator();
@@ -66,21 +67,35 @@ public class FileSaver {
 			
 			result=result+";\n";
 			output.append(result);
+			outputString.add(result);
 			
 			
 		}
 
-		System.out.println(output);
-		saveToDisk(output.toString());
+		
+		saveToDisk(outputString);
 		
 	}
-	private void saveToDisk(String inhalt){
+	private void saveToDisk(ArrayList<String> outputString){
 		
 		Writer fw = null;
+		String line="";
 		
 		try {
 			fw = new FileWriter(pfad);
-			fw.write(inhalt);
+			Iterator outputStringIterator = outputString.iterator();
+			while(outputStringIterator.hasNext()){
+				line = (String)outputStringIterator.next();
+				
+				fw.write(line+"\n");
+				fw.write(System.lineSeparator());
+//				fw.append(System.getProperty("line.seperator"));
+				
+				
+			}
+			
+			
+//			fw.write(outputString);
 			
 			
 		}catch (Exception e) {
