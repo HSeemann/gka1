@@ -45,8 +45,6 @@ public class MainGKA {
 	private boolean btsSuche = false;
 	private final double version = 1.0;
 	
-	//wenn der Testmodus an ist, wird der Thread nach ablauf der Algorithmen beendet
-	private boolean testMode=false;
 	
 	//Analysevariablen
 	private int unreachableNodes=0;
@@ -162,6 +160,8 @@ public class MainGKA {
 		sleep(5000);
 		
 		main.dijkstra("j", "b");
+		
+		
 //		main.btsSuche("Husum", "Hannover");
 		
 //		main.saveGraph();
@@ -855,11 +855,5 @@ public class MainGKA {
 		fileHandler.saveGraph(getAllEdges());
 		
 	}
-	/**
-	 * DEPRECIATED! 
-	 * Stoppt den Thread, indem der Graph läuft.
-	 */
-	public void endThread(){
-		Thread.currentThread().interrupt();
-	}
+	
 }
