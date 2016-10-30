@@ -131,10 +131,10 @@ public class MainGKA {
 		// System.out.println("der Knoten "+ziel+" ist von "+start+" aus zu
 		// erreichen: "+erreichbar);
 
-		main.btsSuche("b", "i");
+		main.btsSuche("a", "f");
 		sleep(5000);
 
-		main.dijkstra("b", "i");
+		main.dijkstra("a", "f");
 
 		// main.btsSuche("Husum", "Hannover");
 
