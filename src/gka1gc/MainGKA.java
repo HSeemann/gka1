@@ -40,6 +40,7 @@ public class MainGKA {
 	private boolean log=false;
 	private boolean dijkstraShort = true;
 	private boolean btsSuche = false;
+	private final double version = 1.0;
 	
 	//Analysevariablen
 	private int unreachableNodes=0;
