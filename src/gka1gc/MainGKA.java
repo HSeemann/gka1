@@ -34,11 +34,11 @@ public class MainGKA {
 
 	// Einstellungsvariablen
 	protected static String stylesheet = "node {fill-color: black; size: 15px, 15px; stroke-mode: plain; stroke-color: blue;} node.marked{ fill-color: red;}node.start{fill-color: green;} node.shortest{ fill-color:green; }edge { fill-color: grey;} edge.shortest{fill-color: green; stroke-width:2px;}";
-	static boolean animated = true;
+	static boolean animated = false;
 	private boolean log = true;
 	private boolean dijkstraShort = true;
 	private boolean btsSuche = false;
-	private final double version = 1.0;
+	private final double version = 1.05;
 
 	// Analysevariablen
 	private int unreachableNodes = 0;

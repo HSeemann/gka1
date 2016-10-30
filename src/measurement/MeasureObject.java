@@ -13,12 +13,13 @@ import scala.collection.mutable.StringBuilder;
 
 public class MeasureObject {
 
-	String vorgang;
-	String vorgangZeitpunkt;
-	String dateiNameZusatz;
-	ArrayList<String> typ;
-	ArrayList<Integer[]> typWerte;
-	ArrayList<String> sonstiges;
+	private String vorgang;
+	private String vorgangZeitpunkt;
+	private String dateiNameZusatz;
+	private ArrayList<String> typ;
+	private ArrayList<Integer[]> typWerte;
+	private ArrayList<String> sonstiges;
+	private boolean writeToDisk = false;
 
 	public MeasureObject() {
 		// TODO Auto-generated constructor stub
@@ -124,6 +125,11 @@ public class MeasureObject {
 	}
 
 	private void saveToDisk(ArrayList<String> outputString) {
+		
+		if(!writeToDisk){
+			return;
+		}
+		
 		Writer fw = null;
 		String line = "";
 
