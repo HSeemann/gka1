@@ -32,7 +32,7 @@ public class MainGKA {
 	
 
 	public MainGKA(FileParser fp) {
-
+//gsff
 		
 		
 		HashSet<String> nodeSet = fp.getNodes();
