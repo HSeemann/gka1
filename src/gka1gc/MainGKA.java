@@ -45,6 +45,9 @@ public class MainGKA {
 	private boolean btsSuche = false;
 	private final double version = 1.0;
 	
+	//wenn der Testmodus an ist, wird der Thread nach ablauf der Algorithmen beendet
+	private boolean testMode=false;
+	
 	//Analysevariablen
 	private int unreachableNodes=0;
 	private boolean weightedGraph=false;
@@ -52,6 +55,8 @@ public class MainGKA {
 	
 
 	public MainGKA(String quellPfad) {
+		
+		
 
 		graph.addAttribute("ui.stylesheet", stylesheet);
 		
@@ -244,6 +249,8 @@ public class MainGKA {
 	public boolean btsSuche(String start, String ende){
 		
 		zugriffsZaehler.startMeasure("BFS-Suche von "+start+" nach "+ende);
+		zugriffsZaehler.log("Knotenanzahl: "+graph.getNodeCount());
+		zugriffsZaehler.log("Kantenanzahl: "+graph.getEdgeCount());
 		
 		//Breitensuche einschalten. Das bedeutet Dijkstra arbeitet mit einem Kantengewicht von 1.0
 		btsSuche=true;
@@ -847,5 +854,12 @@ public class MainGKA {
 	public void saveGraph(){
 		fileHandler.saveGraph(getAllEdges());
 		
+	}
+	/**
+	 * DEPRECIATED! 
+	 * Stoppt den Thread, indem der Graph läuft.
+	 */
+	public void endThread(){
+		Thread.currentThread().interrupt();
 	}
 }
