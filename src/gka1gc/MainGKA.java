@@ -18,21 +18,34 @@ import org.graphstream.graph.implementations.SingleGraph;
 
 public class MainGKA {
 	
+	ArrayList<Edge>shortestWayDijkstra = new ArrayList<>();
+	
+	
+	//der (vorerst) leere Graph
+	static Graph graph = new MultiGraph("GKA");
+	
+	
+	public static final String NodeAttributVisited = "visited";
+	public static final String NodeAttributdistance = "Distanz";
+	public static final String EdgeAttributeWeight = "Gewicht";
+	public static final String EdgeAttributeName = "Name";
+	
+	
+	
+	//Einstellungsvariablen
 	protected static String stylesheet="node {fill-color: black; size: 15px, 15px; stroke-mode: plain; stroke-color: blue;} node.marked{ fill-color: red;}node.start{fill-color: green;} node.shortest{ fill-color:green; }edge { fill-color: grey;} edge.shortest{fill-color: green; stroke-width:2px;}";
-//	protected static String stylesheetEdge="edge { fill-color: grey;} ";
-	static Graph graph = new MultiGraph("anzeigegraph");
 	static boolean animated=true;
 	private boolean log=false;
-	private int unreachableNodes=0;
-	private static String NodeAttributVisited = "visited";
-	private static String NodeAttributdistance = "Distanz";
-	private static String EdgeAttributeWeight = "Gewicht";
-	private boolean weightedGraph=false;
 	private boolean dijkstraShort = true;
+	private boolean btsSuche = false;
+	
+	//Analysevariablen
+	private int unreachableNodes=0;
+	private boolean weightedGraph=false;
 	
 
 	public MainGKA(FileParser fp) {
-//gsff
+
 		
 		
 		HashSet<String> nodeSet = fp.getNodes();
@@ -54,19 +67,31 @@ public class MainGKA {
 			String name=object.getName();
 			
 			
-			if((object.getName()=="")||(object.getName()==null)){
-				name=object.getStartNode()+object.getEndNode();
+			//der eindeutige name (für den Graphen) stetzt sich aus dem namen der beiden Knoten zusammen
+			
+			name=object.getStartNode()+object.getEndNode();
+			
+			//die Kante wird dem Graphen hinzugefügt 
+			graph.addEdge(name, object.getStartNode(), object.getEndNode(),object.getDirected());
+			
+			//Der aus der Datei eingelesene Kantenname wird als attribut gespeichert
+			//dazu muss er zuerst wieder ausgelesen werden 
+			if(!((object.getName()=="")||(object.getName()==null))){
+				Edge temp = graph.getEdge(name);
+				temp.addAttribute(EdgeAttributeName, object.getName());
+				
 				
 			}
 			
 			
-			graph.addEdge(name, object.getStartNode(), object.getEndNode(),object.getDirected());
+			
 			
 			Edge edge = graph.getEdge(name);
 			
 			if(object.getWeight()!=null){
 				edge.addAttribute(EdgeAttributeWeight, object.getWeight());
-				edge.setAttribute("ui.label", ""+object.getWeight());
+				addEdgeLabel(edge.getId());
+//				edge.setAttribute("ui.label", ""+object.getWeight());
 			}else{
 				edge.addAttribute(EdgeAttributeWeight, Double.POSITIVE_INFINITY);
 			}
@@ -84,11 +109,7 @@ public class MainGKA {
 		}
 		
 		
-		//graph.getNode("n1").setAttribute("ui.class", "marked");
-		//graph.getNode("n1").setAttribute("ui.class", "unmarked");
 		
-		
-		//explore(graph.getNode("n1"));
 		
 		
 		
@@ -122,7 +143,10 @@ public class MainGKA {
 //		boolean erreichbar=main.btsSuche(start, ziel);
 //		System.out.println("der Knoten "+ziel+" ist von "+start+" aus zu erreichen: "+erreichbar);
 		
-		main.dijkstra("Husum", "Hannover");
+//		main.dijkstra("Husum", "Hannover");
+		
+		FileSaver fs = new FileSaver();
+		fs.saveToFile(graph.getEdgeSet());
 		
 	}
 	
@@ -148,8 +172,24 @@ public class MainGKA {
 	 * @param name Name der Kante (Edge) die ein Label bekommen soll
 	 */
 	private static void addEdgeLabel(String name){
+		//TODO edgeNamen hinzu
 		Edge edge = graph.getEdge(name);
-		edge.setAttribute("ui.label", edge.getId());
+		
+		String edgeName = (String)edge.getAttribute(EdgeAttributeName);
+		
+		Double edgeWeight = (Double)edge.getAttribute(EdgeAttributeWeight);
+		
+		if((edgeName==null||edgeName.equals(""))&&edgeWeight!=null){
+			edge.setAttribute("ui.label", edgeWeight);
+		}else if(edgeName!=null && edgeWeight==null){
+			edge.setAttribute("ui.label", edgeName);
+		}
+		
+		
+		
+		
+		
+		
 	}
 	public static void explore(Node source){
 		System.out.println("explore: "+source.getId());
@@ -190,101 +230,114 @@ public class MainGKA {
 	 */
 	public boolean btsSuche(String start, String ende){
 		
-		//variable zum zaehlen der besuchten Knoten
-		//wird benötigt um festzustellen ob ALLE knoten überhaupt erreichbar sind
-		int visitedNodes=0;
+		//Breitensuche einschalten. Das bedeutet Dijkstra arbeitet mit einem Kantengewicht von 1.0
+		btsSuche=true;
 		
-		LinkedList<Node> queue = new LinkedList<>();
+		dijkstra(start, ende);
 		
-		log("Die breitensuche beginnt bei "+start+" und soll "+ende+" enden");
+//		//variable zum zaehlen der besuchten Knoten
+//		//wird benötigt um festzustellen ob ALLE knoten überhaupt erreichbar sind
+//		int visitedNodes=0;
+//		
+//		LinkedList<Node> queue = new LinkedList<>();
+//		
+//		log("Die breitensuche beginnt bei "+start+" und soll "+ende+" enden");
+//		
+//		Node startNode = graph.getNode(start);
+//		Node endNode = graph.getNode(ende);
+//		startNode.setAttribute(NodeAttributVisited, true);
+//		queue.add(startNode);
+//		Node tempNode;
+//		startNode.addAttribute("ui.class", "start");
+//		
+//		
+//		while(!queue.isEmpty()){
+//			
+//			
+//			//zur verschönerung den Startnode anders färben als die Besuchten
+//			startNode.addAttribute("ui.class", "start");
+//			
+//			
+////			System.out.println(queue.toString());
+//			
+//			//der erste Knoten wird aus der Queue entnommen (startNode) 
+//			tempNode=queue.pollFirst();
+//
+//			log("Der aktuelle Knoten ist: "+tempNode.getId()+" und wurde als besucht markiert");
+//			log("Die Queue ist: "+queue.toString());
+//			
+//			
+//			
+//			//der Aktuelle knoten wird als besucht markiert
+//			tempNode.setAttribute(NodeAttributVisited, true);
+//			tempNode.setAttribute("ui.class", "marked");
+//			
+////			System.out.println(tempNode.getId());
+//			if(tempNode.getId().equals(endNode.getId())){
+//				return true;
+//			}
+//			
+//			
+////			System.out.println("visit: "+tempNode.getId());
+//			visitedNodes+=1;
+//			//sleep zum animieren der veränderungen
+//			sleep();
+//			
+//			
+//			Iterator NodeIterator = tempNode.getEachEdge().iterator();
+//			//Iteriert über ALLE kanten des aktuellen knotens
+//			while(NodeIterator.hasNext()){
+//				Edge edge = (Edge)NodeIterator.next();
+//					
+//				
+//					//wenn die kante gerichtet ist, wird geprüft ob der aktuelle knoten das ziel oder die Quelle 
+//					//der Kante ist
+//					if(edge.isDirected()){
+//						
+////						wenn der aktuelle knoten NICHT der Zielknoten der gerichteten Kante ist
+//						if(edge.getTargetNode()!=tempNode){
+//							
+////							hier wird festgestellt ob der knoten schon enmal besucht war
+//							if(!isNodeVisited(edge.getTargetNode().getId())){
+////								System.out.println("den knoten "+edge.getTargetNode().getId()+" wurde schon besucht");
+//								//ab hier ist der aktuelle Knoten NICHT das Ziel der gerichteten Kante								
+//								
+//								//wenn der knoten noch nicht besucht wurde, wird geprüft ob er schon in der queue ist
+//								//wenn das der Fall ist, wird er der Queue hinzugefuegt
+//								if(! (queueContainsNode(queue, edge.getTargetNode().getId())||isNodeVisited(edge.getTargetNode().getId())) ){
+//									queue.add(edge.getTargetNode());
+//									log("der Knoten der gerichteten Kante, der noch nicht besuht ist UND noch nicht in der queue ist "+edge.getTargetNode().getId()+" wird der queue hinzugefügt");
+//								}
+//								
+//							}
+//						}
+//					}else{
+//						//wenn im undirekten Graphen der gegenüberliegende Knoten vom aktuellen knoten (auf der selben kante)
+//						// noch nicht in der queue ist, wird er hinzugefügt
+//						Node oppositeNode = edge.getOpposite(tempNode);
+//						if(! (queueContainsNode(queue, oppositeNode.getId())||isNodeVisited(oppositeNode.getId())) ){
+//							
+//							queue.add(oppositeNode);
+//							log("242:Knoten "+edge.getOpposite(tempNode).getId()+" wird der queue hinzugefuegt");
+//						}
+//					}
+//				
+//			}
+//			
+//				
+//			
+//		}
+//		
+//		int unvisitedNodes = graph.getNodeCount()-visitedNodes;
+//		if(unvisitedNodes!=0){
+//			log("es konnten "+unvisitedNodes+" knoten nicht besucht werden");
+//		}
 		
-		Node startNode = graph.getNode(start);
-		Node endNode = graph.getNode(ende);
-		startNode.setAttribute(NodeAttributVisited, true);
-		queue.add(startNode);
-		Node tempNode;
-		startNode.addAttribute("ui.class", "start");
 		
 		
-		while(!queue.isEmpty()){
-			
-			
-			//zur verschönerung den Startnode anders färben als die Besuchten
-			startNode.addAttribute("ui.class", "start");
-			
-			
-//			System.out.println(queue.toString());
-			
-			//der erste Knoten wird aus der Queue entnommen (startNode) 
-			tempNode=queue.pollFirst();
-
-			log("Der aktuelle Knoten ist: "+tempNode.getId()+" und wurde als besucht markiert");
-			log("Die Queue ist: "+queue.toString());
-			
-			
-			
-			//der Aktuelle knoten wird als besucht markiert
-			tempNode.setAttribute(NodeAttributVisited, true);
-			tempNode.setAttribute("ui.class", "marked");
-			
-//			System.out.println(tempNode.getId());
-			if(tempNode.getId().equals(endNode.getId())){
-				return true;
-			}
-			
-			
-//			System.out.println("visit: "+tempNode.getId());
-			visitedNodes+=1;
-			//sleep zum animieren der veränderungen
-			sleep();
-			
-			
-			Iterator NodeIterator = tempNode.getEachEdge().iterator();
-			//Iteriert über ALLE kanten des aktuellen knotens
-			while(NodeIterator.hasNext()){
-				Edge edge = (Edge)NodeIterator.next();
-					
-				
-					//wenn die kante gerichtet ist, wird geprüft ob der aktuelle knoten das ziel oder die Quelle 
-					//der Kante ist
-					if(edge.isDirected()){
-						
-//						wenn der aktuelle knoten NICHT der Zielknoten der gerichteten Kante ist
-						if(edge.getTargetNode()!=tempNode){
-							
-//							hier wird festgestellt ob der knoten schon enmal besucht war
-							if(!isNodeVisited(edge.getTargetNode().getId())){
-//								System.out.println("den knoten "+edge.getTargetNode().getId()+" wurde schon besucht");
-								//ab hier ist der aktuelle Knoten NICHT das Ziel der gerichteten Kante								
-								
-								//wenn der knoten noch nicht besucht wurde, wird geprüft ob er schon in der queue ist
-								//wenn das der Fall ist, wird er der Queue hinzugefuegt
-								if(! (queueContainsNode(queue, edge.getTargetNode().getId())||isNodeVisited(edge.getTargetNode().getId())) ){
-									queue.add(edge.getTargetNode());
-									log("der Knoten der gerichteten Kante, der noch nicht besuht ist UND noch nicht in der queue ist "+edge.getTargetNode().getId()+" wird der queue hinzugefügt");
-								}
-								
-							}
-						}
-					}else{
-						//wenn im undirekten Graphen der gegenüberliegende Knoten vom aktuellen knoten (auf der selben kante)
-						// noch nicht in der queue ist, wird er hinzugefügt
-						Node oppositeNode = edge.getOpposite(tempNode);
-						if(! (queueContainsNode(queue, oppositeNode.getId())||isNodeVisited(oppositeNode.getId())) ){
-							
-							queue.add(oppositeNode);
-							log("242:Knoten "+edge.getOpposite(tempNode).getId()+" wird der queue hinzugefuegt");
-						}
-					}
-				
-			}
-		}
-		
-		int unvisitedNodes = graph.getNodeCount()-visitedNodes;
-		if(unvisitedNodes!=0){
-			log("es konnten "+unvisitedNodes+" knoten nicht besucht werden");
-		}
-		return false;
+		//btsSuche ausschalten
+		btsSuche=false;
+		return true;
 		
 		
 		
@@ -342,7 +395,14 @@ public class MainGKA {
 		//die Variable "nachbar" wird mit dem übergebenen knoten initialisiert
 		//einfach nur damit sie initialisiert ist^^ 
 		Node nachbar;
-		Double edgeGewicht = (Double)kante.getAttribute(EdgeAttributeWeight);
+		
+		Double edgeGewicht;
+		
+		if(btsSuche){
+			edgeGewicht = 1.0;
+		}else{
+			edgeGewicht = (Double)kante.getAttribute(EdgeAttributeWeight);
+		}
 		Double knotenGewicht = (Double)knoten.getAttribute(NodeAttributdistance);
 		
 		Double distanz = knotenGewicht+edgeGewicht;
@@ -524,8 +584,20 @@ public class MainGKA {
 				
 				tempEdge.setAttribute(EdgeAttributeWeight, 1.0);
 				
+				
+				String edgeName = (String) tempEdge.getAttribute(EdgeAttributeName);
+				
+				
 				//das label ggf wieder entfernen
-				tempEdge.setAttribute("ui.label", 1.0);
+//				if(edgeName.equals("")||edgeName==null){
+//				
+//					tempEdge.setAttribute("ui.label", 1.0);
+//				}else{
+//					
+//				}
+				
+				
+				
 				
 			}
 		}
@@ -588,6 +660,7 @@ public class MainGKA {
 			tempNode=tempEdge.getOpposite(tempNode);
 		}
 		
+		shortestWayDijkstra=shortestWay;
 		return shortestWay;
 		
 	}
@@ -646,5 +719,9 @@ public class MainGKA {
 		
 		
 		return minimumEdge;
+	}
+	public ArrayList<Edge> getSortestWay(){
+		return shortestWayDijkstra;
+		
 	}
 }
