@@ -1,6 +1,7 @@
 package gka1gc;
 
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,15 +18,17 @@ import org.graphstream.graph.implementations.SingleGraph;
 
 public class MainGKA {
 	
-	protected static String stylesheet="node {fill-color: black; size: 15px, 15px; stroke-mode: plain; stroke-color: blue;} node.marked{ fill-color: red;}node.start{fill-color: green;} edge { fill-color: grey;} ";
+	protected static String stylesheet="node {fill-color: black; size: 15px, 15px; stroke-mode: plain; stroke-color: blue;} node.marked{ fill-color: red;}node.start{fill-color: green;} node.shortest{ fill-color:green; }edge { fill-color: grey;} edge.shortest{fill-color: green; stroke-width:2px;}";
 //	protected static String stylesheetEdge="edge { fill-color: grey;} ";
 	static Graph graph = new MultiGraph("anzeigegraph");
 	static boolean animated=true;
-	private boolean log=true;
+	private boolean log=false;
 	private int unreachableNodes=0;
 	private static String NodeAttributVisited = "visited";
 	private static String NodeAttributdistance = "Distanz";
 	private static String EdgeAttributeWeight = "Gewicht";
+	private boolean weightedGraph=false;
+	private boolean dijkstraShort = true;
 	
 
 	public MainGKA(FileParser fp) {
@@ -76,6 +79,10 @@ public class MainGKA {
 			node.addAttribute("ui.label", node.getId());
 		}
 		
+		if(fp.isWeighted()){
+			weightedGraph=true;
+		}
+		
 		
 		//graph.getNode("n1").setAttribute("ui.class", "marked");
 		//graph.getNode("n1").setAttribute("ui.class", "unmarked");
@@ -101,7 +108,8 @@ public class MainGKA {
 		
 		
 //		FileParser fp = new FileParser("H:\\Files\\Dropbox\\Dropbox\\Uni\\Semester 3\\GKA\\Hölings\\bspGraphen\\bsp.gka");
-		FileParser fp = new FileParser("C:\\Users\\Patrick\\Dropbox\\Uni\\Semester 3\\GKA\\Hölings\\bspGraphen\\graph03.gka");
+		FileParser fp = new FileParser("H:\\Files\\Dropbox\\Dropbox\\Uni\\Semester 3\\GKA\\Hölings\\bspGraphen\\graph03.gka");
+//		FileParser fp = new FileParser("C:\\Users\\Patrick\\Dropbox\\Uni\\Semester 3\\GKA\\Hölings\\bspGraphen\\graph03.gka");
 		fp.parsefile();
 		MainGKA main = new MainGKA(fp);
 		
@@ -109,12 +117,12 @@ public class MainGKA {
 		graph.display();
 		
 //		sleep();
-		String start="Detmold";
-		String ziel="Husum";
+//		String start="Detmold";
+//		String ziel="Husum";
 //		boolean erreichbar=main.btsSuche(start, ziel);
 //		System.out.println("der Knoten "+ziel+" ist von "+start+" aus zu erreichen: "+erreichbar);
 		
-		main.dijkstra("Hamburg", "Husum");
+		main.dijkstra("Husum", "Hannover");
 		
 	}
 	
@@ -159,8 +167,13 @@ public class MainGKA {
 	}
 	private static void sleep() {
 		
+		sleep(1000);
+		
+	}
+	private static void sleep(long millis) {
+		
 		if(animated){
-		try {Thread.sleep(1000);} catch(Exception e){
+		try {Thread.sleep(millis);} catch(Exception e){
 			
 		}}
 		
@@ -300,7 +313,7 @@ public class MainGKA {
 		
 		Node node = graph.getNode(nodename);
 		log("Node "+node.getId()+" ist besucht:"+node.getAttribute(NodeAttributVisited));
-		return node.getAttribute(NodeAttributVisited);
+		return (boolean)node.getAttribute(NodeAttributVisited);
 //		System.out.println("knoten isVisited: "+node.getId()+" zustand: "+node.getAttribute("besucht"));
 //		String besucht = ""+node.getAttribute("besucht");
 		
@@ -325,8 +338,6 @@ public class MainGKA {
 	 */
 	private void distanzUpdate(Node knoten, Edge kante){
 		
-//		TODO wenn der gesamte graph ungewichtet ist, dann sollen die kanten eine wertigkeit von 1 haben
-		
 		
 		//die Variable "nachbar" wird mit dem übergebenen knoten initialisiert
 		//einfach nur damit sie initialisiert ist^^ 
@@ -349,8 +360,10 @@ public class MainGKA {
 		}
 		
 		Double nachbargewicht = nachbar.getAttribute(NodeAttributdistance);
+		Double minGewicht = Math.min(distanz, nachbargewicht);
 //		log("dijstra-distanzUpdate-- nachbargewicht: "+nachbargewicht);
-		nachbar.addAttribute(NodeAttributdistance, Math.min(distanz, nachbargewicht));
+		nachbar.addAttribute(NodeAttributdistance, minGewicht);
+		addNodeWeightLabel(nachbar, minGewicht);
 		
 	}
 	public void dijkstra(String startKnoten, String endKnoten){
@@ -385,6 +398,12 @@ public class MainGKA {
 			log("dijstra---momentane tempNode: "+tempNode.getId());
 			log("dijstra---queue:"+queue.toString());
 			
+			
+			tempNode.setAttribute(NodeAttributVisited, true);
+			tempNode.setAttribute("ui.class", "marked");
+			log("dijstra---der Knoten "+tempNode.getId()+" wird als besucht markiert");
+			
+			
 			Iterator edgeIterator = tempNode.getEdgeIterator();
 			while(edgeIterator.hasNext()){
 				tempEdge=(Edge)edgeIterator.next();
@@ -394,7 +413,7 @@ public class MainGKA {
 				Node tempNachbar = tempEdge.getOpposite(tempNode);
 				boolean besucht = (boolean)tempNachbar.getAttribute(NodeAttributVisited);
 				
-				if((!besucht)&&(!queue.contains(tempEdge.getOpposite(tempNode)))){
+				if((!besucht)&&(!queue.contains(tempNachbar))){
 					//Wenn der gegenüberliegende Knoten noch nicht besucht ist, und noch nicht 
 					//in der Queue, dann wird er zur queue hinzugefügt
 					queue.add(tempNachbar);
@@ -402,26 +421,59 @@ public class MainGKA {
 				}
 				
 			}
-			tempNode.setAttribute(NodeAttributVisited, true);
-			tempNode.setAttribute("ui.class", "marked");
-			log("dijstra---der Knoten "+tempNode.getId()+" wird als besucht markiert");
-			if(tempNode==ende){
+			
+			
+//			wenn diese if-Bedingung aktiv ist, hoert der Algorithmus auf, denn wenn der zuletzt gefundene Knoten der Zielknoten ist,
+//			ist das schon der kürzeste weg da immer der aktuell kürzeste weg untersucht wird.
+			if(dijkstraShort&&tempNode==ende){
 				break;
 			}
 			
 			
 		}
-		//hier jetzt noch den kürzesten weg finden lassen und im graphen anzeigen lassen
+		
+		logShortestWay(start, getShortestWay(start, ende));
 		log("dijstra---fertig");
 	}
 	
+	private void logShortestWay(Node startNode, ArrayList<Edge> shortestWay) {
+		log("dijkstra--shortestWay--start");
+		
+		Edge temp;
+		Node succ=null;
+		Node prev = startNode;
+		
+		for(int i = shortestWay.size()-1;i>=0;i--){
+			
+			temp=shortestWay.get(i);
+			succ=temp.getOpposite(prev);
+			log("dijkstra--shortestWay--von "+prev.getId()+" nach "+succ.getId());
+			
+			prev=succ;
+			
+		}
+		
+		log("dijkstra--shortestWay--es waren "+shortestWay.size()+" Kanten (Spruenge)");
+		
+		if(weightedGraph){
+			log("dijkstra--shortestWay--eine Distanz von: "+((Double)succ.getAttribute(NodeAttributdistance)));
+		}
+			
+	}
+		
+	
+
+
+
 	/**
 	 * liefert aus der queue das Element mit dem niedrifsten weg zurück
 	 * @param queue die Queue aus der das Minimum geliefert wird
 	 * @return den Knoten mit dem niedrigsten weg
 	 */
 	private Node getMinimumNode(LinkedList<Node> queue){
-		Node minimalNode=queue.pollFirst();
+		
+		
+		Node minimalNode=queue.getFirst();
 		Node temp=null;
 		Double minimumEntfernung = (Double)minimalNode.getAttribute(NodeAttributdistance);
 		
@@ -445,11 +497,13 @@ public class MainGKA {
 	}
 	/**
 	 * bereitet vor, indem alle Knotenentfernungen mit Double.PositivInfinite
-	 * initialisiert werden UND alle knoten unmarkiert werden
+	 * initialisiert werden UND alle knoten unmarkiert werden (und ein paar viselle dinge..)
 	 */
 	private void initializeDijkstra(){
 		//wenn der gesamte Graph ungewichtet ist, sollen alle kanten mit einem gewicht von 1.0
 		//initialisiert werden
+		
+		
 		
 		Node temp;
 		Iterator nodeIterator = graph.getNodeIterator();
@@ -460,5 +514,137 @@ public class MainGKA {
 			temp.setAttribute("ui.class", "unmarked");
 			temp.setAttribute(NodeAttributVisited, false);
 		}
+		
+		
+		if(!weightedGraph){
+			Edge tempEdge;
+			Iterator edgeIterator = graph.getEdgeIterator();
+			while(edgeIterator.hasNext()){
+				tempEdge = (Edge)edgeIterator.next();
+				
+				tempEdge.setAttribute(EdgeAttributeWeight, 1.0);
+				
+				//das label ggf wieder entfernen
+				tempEdge.setAttribute("ui.label", 1.0);
+				
+			}
+		}
+		
+	}
+	/**
+	 * Fügt dem Knoten seine aktuelle Entfernung als Beschriftung für  
+	 * @param node
+	 * @param weight
+	 */
+	private void addNodeWeightLabel(Node node,Double weight){
+		
+		String nodeName = node.getId();
+		node.addAttribute("ui.label", nodeName+" : "+weight);
+		
+	}
+	/**
+	 * Liefert einen kürzesten Weg in einer Liste zurück
+	 * Vorbedingung: der Dijkstra-Algorithmus ist einmal durchlaufen UND es gibt (mindestens) 
+	 * einen kürzesten weg.
+	 * Nachbedingungen: der Graph bleibt unverändert. 
+	 * 
+	 * @param endknoten
+	 * @return enthält einen Kürzesten Weg in umgekehrter Reihenfolge. Also das erste Element ist die letzte Kante die zum Zielknoten führt
+	 */
+	private ArrayList<Edge> getShortestWay(Node startKnoten, Node endknoten){
+		
+		
+		ArrayList<Edge> shortestWay = new ArrayList<Edge>();
+		
+		
+		Node tempNode = endknoten;
+		
+		while(tempNode!=startKnoten){
+			
+			//temporäre liste aller edges aus denen das Minumum - also der nächst kürzeste Knoten - extrahiert wird 
+			ArrayList<Edge> tempList = new ArrayList<Edge>();
+			Edge tempEdge;
+			
+			Iterator edgeIterator = tempNode.getEdgeIterator();
+			while(edgeIterator.hasNext()){
+				tempEdge = (Edge) edgeIterator.next();
+				
+				if(tempEdge.isDirected()){
+					
+					if(tempEdge.getTargetNode()==tempNode){
+						tempList.add(tempEdge);
+					}
+					
+				}else{
+					tempList.add(tempEdge);
+				}
+				
+				
+				
+			}
+			tempEdge = getMinimumEdge(tempNode, tempList);
+			shortestWay.add(tempEdge);
+			markEdgeVisual(tempEdge);
+			tempNode=tempEdge.getOpposite(tempNode);
+		}
+		
+		return shortestWay;
+		
+	}
+
+
+	private void markEdgeVisual(Edge tempEdge) {
+		
+		if(animated){
+			sleep(300);
+		}
+		
+		tempEdge.getTargetNode().addAttribute("ui.class", "shortest");
+		tempEdge.addAttribute("ui.class", "shortest");
+		tempEdge.getSourceNode().addAttribute("ui.class", "shortest");
+		
+		
+	}
+
+
+
+	/**
+	 * Liefert die Kante mit mit der geringsten Entfernung zum start zurück
+	 * 
+	 * Vorbedingungen: In der Liste befinden sich nur Kanten, dessen Knoten -vom Startpunkt des Dijkstra aus betrachtet- den
+	 * übergebenen Knoten erreichen können.
+	 * Nachbedingungen: es wird nur 1 minimales Objekt übergeben
+	 * @param tempNode
+	 * @param tempList
+	 * @return
+	 */
+	private Edge getMinimumEdge(Node tempNode, ArrayList<Edge> tempList) {
+		
+		//tempNode ist der Knoten der näher am ziel liegt - also der der zum Startpunkt guckt
+		
+		Node vergleichsNode;
+		Double vergleichsGewicht;
+		Edge tempEdge;
+		Edge minimumEdge = tempList.get(0);
+		Double minimumWeight = (Double) minimumEdge.getOpposite(tempNode).getAttribute(NodeAttributdistance);
+		
+		
+		Iterator listIterator = tempList.iterator();
+		while(listIterator.hasNext()){
+			tempEdge = (Edge) listIterator.next();
+			
+			vergleichsNode = tempEdge.getOpposite(tempNode);
+			vergleichsGewicht = (Double) vergleichsNode.getAttribute(NodeAttributdistance);
+			
+			if(vergleichsGewicht<minimumWeight){
+				minimumEdge=tempEdge;
+				minimumWeight= vergleichsGewicht;
+				
+			}
+			
+		}
+		
+		
+		return minimumEdge;
 	}
 }
